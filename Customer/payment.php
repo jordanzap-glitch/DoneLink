@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (in_array($fileExtension, $allowedfileExtensions)) {
             // Move the file to the specified directory
             if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                // Get subscription_id and price from tbl_subscription
-                $query = "SELECT c.subscription_id, s.price FROM tbl_customer c JOIN tbl_subscription s ON c.subscription_id = s.id WHERE c.id = ?";
+                // Get subscription_id, price, and subs_type from tbl_subscription
+                $query = "SELECT c.subscription_id, s.price, s.subs_type FROM tbl_customer c JOIN tbl_subscription s ON c.subscription_id = s.id WHERE c.id = ?";
                 $stmt = $conn->prepare($query);
                 
                 // Check if the statement was prepared successfully
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Bind parameters
                 $stmt->bind_param("i", $customerId);
                 $stmt->execute();
-                $stmt->bind_result($subscriptionId, $price);
+                $stmt->bind_result($subscriptionId, $price, $subsType);
                 $stmt->fetch();
                 $stmt->close();
 
@@ -82,23 +82,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch the latest payment record for the receipt modal
-$latestPayment = null;
-$query = "SELECT transaction_id, customer_id, subscription_id, price, status FROM tbl_payment WHERE id = ? ORDER BY date_created DESC LIMIT 1";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $_SESSION['userId']);
-$stmt->execute();
-$stmt->bind_result($transactionId, $customerId, $subscriptionId, $price, $status);
-if ($stmt->fetch()) {
-    $latestPayment = [
-        'transaction_id' => $transactionId,
-        'customer_id' => $customerId,
-        'subscription_id' => $subscriptionId,
-        'price' => $price,
-        'status' => $status
-    ];
-}
-$stmt->close();
+// Fetch receipts for the logged-in user
+$customerId = $_SESSION['userId'];
+$receiptsQuery = "SELECT transaction_id, status, date_created, customer_id, subscription_id, price FROM tbl_payment WHERE customer_id = ?";
+$receiptsStmt = $conn->prepare($receiptsQuery);
+$receiptsStmt->bind_param("i", $customerId);
+$receiptsStmt->execute();
+$receiptsResult = $receiptsStmt->get_result();
+
+// Fetch full name of the customer
+$fullNameQuery = "SELECT firstname, middlename, lastname FROM tbl_customer WHERE id = ?";
+$fullNameStmt = $conn->prepare($fullNameQuery);
+$fullNameStmt->bind_param("i", $customerId);
+$fullNameStmt->execute();
+$fullNameStmt->bind_result($firstname, $middlename, $lastname);
+$fullNameStmt->fetch();
+$fullNameStmt->close();
+
+$fullName = trim($firstname . ' ' . ($middlename ? $middlename . ' ' : '') . $lastname);
 ?>
 
 <!DOCTYPE html>
@@ -182,8 +183,48 @@ $stmt->close();
                                     </div>
                                     <br>
                                     <button type="submit" class="btn btn-success">Submit</button>
-                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#receiptModal">View Receipt</button>
                                 </form>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Receipts</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="multi-filter-select" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Transaction ID</th>
+                                                <th>Status</th>
+                                                <th>Date Created</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php while ($row = $receiptsResult->fetch_assoc()): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($row['transaction_id']); ?></td>
+                                                    <td>
+                                                        <?php if ($row['status'] === 'pending'): ?>
+                                                            <span class="badge badge-warning"><?php echo htmlspecialchars($row['status']); ?></span>
+                                                        <?php elseif ($row['status'] === 'paid'): ?>
+                                                            <span class="badge badge-success"><?php echo htmlspecialchars($row['status']); ?></span>
+                                                        <?php elseif ($row['status'] === 'denied'): ?>
+                                                            <span class="badge badge-danger"><?php echo htmlspecialchars($row['status']); ?></span>
+                                                        <?php else: ?>
+                                                            <?php echo htmlspecialchars($row['status']); ?>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td><?php echo date('F j, Y, g:i a', strtotime($row['date_created'])); ?></td> <!-- Updated date format -->
+                                                    <td>
+                                                        <button class="btn btn-sm btn-info" onclick="openViewModal('<?php echo htmlspecialchars($row['transaction_id']); ?>', '<?php echo htmlspecialchars($row['status']); ?>', '<?php echo date('F j, Y, g:i a', strtotime($row['date_created'])); ?>', '<?php echo htmlspecialchars($fullName); ?>', '<?php echo htmlspecialchars($row['subscription_id']); ?>', '<?php echo htmlspecialchars($row['price']); ?>')">View</button>
+                                                    </td>
+                                                </tr>
+                                            <?php endwhile; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -202,26 +243,27 @@ $stmt->close();
             </div>
         </div>
 
-        <!-- View Receipt Modal -->
-        <div class="modal fade" id="receiptModal" tabindex="-1" role="dialog" aria-labelledby="receiptModalLabel" aria-hidden="true">
+        <!-- View Payment Modal -->
+        <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="receiptModalLabel">View Receipt</h5>
+                        <h5 class="modal-title" id="viewModalLabel">Payment Details</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <?php if ($latestPayment): ?>
-                            <p><strong>Transaction ID:</strong> <?php echo htmlspecialchars($latestPayment['transaction_id']); ?></p>
-                            <p><strong>Customer ID:</strong> <?php echo htmlspecialchars($latestPayment['customer_id']); ?></p>
-                            <p><strong>Subscription ID:</strong> <?php echo htmlspecialchars($latestPayment['subscription_id']); ?></p>
-                            <p><strong>Price:</strong> <?php echo htmlspecialchars($latestPayment['price']); ?></p>
-                            <p><strong>Status:</strong> <?php echo htmlspecialchars($latestPayment['status']); ?></p>
-                        <?php else: ?>
-                            <p>No payment records found.</p>
-                        <?php endif; ?>
+                        <p><strong>Transaction ID:</strong> <span id="viewTransactionId"></span></p>
+                        <p><strong>Full Name:</strong> <span id="viewCustomerName"></span></p>
+                        <p><strong>Subscription Type:</strong> <span id="viewSubscriptionType"></span></p>
+                        <p><strong>Price:</strong> <span id="viewPrice"></span></p>
+                        <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+                        <p><strong>Date Created:</strong> <span id="viewDateCreated"></span></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="window.location.href='payment.php';">OK</button>
+                        <button type="button" class="btn btn-info" onclick="downloadReceipt()">Download PDF</button>
                     </div>
                 </div>
             </div>
@@ -261,5 +303,93 @@ $stmt->close();
     
     <!-- Kaiadmin JS -->
     <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+        // Function to open the view modal
+        function openViewModal(transactionId, status, dateCreated, customerName, subscriptionId, price) {
+            // Fetch subscription type based on subscriptionId
+            $.ajax({
+                url: 'get_subscription_type.php', // Create this PHP file to fetch subscription type
+                type: 'POST',
+                data: { subscription_id: subscriptionId },
+                success: function(response) {
+                    $('#viewTransactionId').text(transactionId);
+                    $('#viewStatus').text(status);
+                    $('#viewDateCreated').text(dateCreated);
+                    $('#viewCustomerName').text(customerName);
+                    $('#viewSubscriptionType').text(response); // Set subscription type
+                    $('#viewPrice').text(price);
+                    $('#viewModal').modal('show');
+                }
+            });
+        }
+
+        function downloadReceipt() {
+            const transactionId = $('#viewTransactionId').text();
+            const customerName = $('#viewCustomerName').text();
+            const subscriptionType = $('#viewSubscriptionType').text();
+            const price = $('#viewPrice').text();
+            const status = $('#viewStatus').text();
+            const dateCreated = $('#viewDateCreated').text();
+
+            // Create a form to send the data
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'generate_receipt.php';
+
+            // Create hidden inputs for each piece of data
+            const inputs = [
+                { name: 'transaction_id', value: transactionId },
+                { name: 'customer_name', value: customerName },
+                { name: 'subscription_type', value: subscriptionType },
+                { name: 'price', value: price },
+                { name: 'status', value: status },
+                { name: 'date_created', value: dateCreated }
+            ];
+
+            inputs.forEach(inputData => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = inputData.name;
+                input.value = inputData.value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit(); // Submit the form to download the PDF
+        }
+
+        $(document).ready(function () {
+            $("#multi-filter-select").DataTable({
+                pageLength: 5,
+                initComplete: function () {
+                    this.api()
+                        .columns()
+                        .every(function () {
+                            var column = this;
+                            var select = $(
+                                '<select class="form-select"><option value=""></option></select>'
+                            )
+                                .appendTo($(column.footer()).empty())
+                                .on("change", function () {
+                                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                                    column
+                                        .search(val ? "^" + val + "$" : "", true, false)
+                                        .draw();
+                                });
+                            column
+                                .data()
+                                .unique()
+                                .sort()
+                                .each(function (d, j) {
+                                    select.append(
+                                        '<option value="' + d + '">' + d + "</option>"
+                                    );
+                                });
+                        });
+                },
+            });
+        });
+    </script>
 </body>
 </html>
