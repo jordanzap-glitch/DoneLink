@@ -148,11 +148,11 @@ $transactionsResult = $transactionsStmt->get_result();
                                                     <td class="text-end"><?php echo date('F j, Y, g:i a', strtotime($row['date_created'])); ?></td>
                                                     <td class="text-end"><?php echo htmlspecialchars($row['price']); ?></td>
                                                     <td class="text-end">
-                                                        <?php if ($row['status'] === 'pending'): ?>
+                                                        <?php if ($row['status'] === 'Pending'): ?>
                                                             <span class="badge badge-warning"><?php echo htmlspecialchars($row['status']); ?></span>
-                                                        <?php elseif ($row['status'] === 'paid'): ?>
+                                                        <?php elseif ($row['status'] === 'Paid'): ?>
                                                             <span class="badge badge-success"><?php echo htmlspecialchars($row['status']); ?></span>
-                                                        <?php elseif ($row['status'] === 'denied'): ?>
+                                                        <?php elseif ($row['status'] === 'Denied'): ?>
                                                             <span class="badge badge-danger"><?php echo htmlspecialchars($row['status']); ?></span>
                                                         <?php else: ?>
                                                             <?php echo htmlspecialchars($row['status']); ?>

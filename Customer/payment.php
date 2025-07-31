@@ -9,6 +9,9 @@ function generateTransactionId() {
     return $letters . $numbers;
 }
 
+// Initialize status message variable
+$statusMsg = "";
+
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if the file was uploaded without errors
@@ -24,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $fileExtension = strtolower(end($fileNameCmps));
 
         // Specify the directory where the file will be uploaded
-        $uploadFileDir = 'uploads/';
+        $uploadFileDir = '../uploads/';
         $dest_path = $uploadFileDir . $fileName;
 
         // Check if the file is an image
@@ -50,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 // Generate transaction ID and set status
                 $transactionId = generateTransactionId();
-                $status = 'pending';
+                $status = 'Pending';
                 $dateCreated = date('Y-m-d H:i:s'); // Current date and time
 
                 // Insert the payment record into the database
@@ -67,18 +70,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 // Execute the statement
                 if ($stmt->execute()) {
-                    echo "<script>alert('Payment submitted successfully!');</script>";
+                    $statusMsg = "added"; // Set status message for success
                 } else {
-                    echo "<script>alert('Error submitting payment.');</script>";
+                    $statusMsg = "Error submitting payment."; // Set status message for error
                 }
             } else {
-                echo "<script>alert('Error moving the uploaded file.');</script>";
+                $statusMsg = "Error moving the uploaded file."; // Set status message for file move error
             }
         } else {
-            echo "<script>alert('Upload failed. Allowed file types: jpg, gif, png, jpeg.');</script>";
+            $statusMsg = "Upload failed. Allowed file types: jpg, gif, png, jpeg."; // Set status message for invalid file type
         }
     } else {
-        echo "<script>alert('No file uploaded or there was an upload error.');</script>";
+        $statusMsg = "No file uploaded or there was an upload error."; // Set status message for upload error
     }
 }
 
@@ -206,11 +209,11 @@ $fullName = trim($firstname . ' ' . ($middlename ? $middlename . ' ' : '') . $la
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($row['transaction_id']); ?></td>
                                                     <td>
-                                                        <?php if ($row['status'] === 'pending'): ?>
+                                                        <?php if ($row['status'] === 'Pending'): ?>
                                                             <span class="badge badge-warning"><?php echo htmlspecialchars($row['status']); ?></span>
-                                                        <?php elseif ($row['status'] === 'paid'): ?>
+                                                        <?php elseif ($row['status'] === 'Paid'): ?>
                                                             <span class="badge badge-success"><?php echo htmlspecialchars($row['status']); ?></span>
-                                                        <?php elseif ($row['status'] === 'denied'): ?>
+                                                        <?php elseif ($row['status'] === 'Denied'): ?>
                                                             <span class="badge badge-danger"><?php echo htmlspecialchars($row['status']); ?></span>
                                                         <?php else: ?>
                                                             <?php echo htmlspecialchars($row['status']); ?>
@@ -234,7 +237,7 @@ $fullName = trim($firstname . ' ' . ($middlename ? $middlename . ' ' : '') . $la
                                 <div class="card-title">QR Code</div>
                             </div>
                             <div class="card-body">
-                                <img src="img/qr-code2.png" alt="Sample QR Code" class="img-fluid" />
+                                <img src="assets/img/qr-code.png" alt="Sample QR Code" class="img-fluid" />
                                 <!-- Replace the src with the actual path to your QR code image -->
                             </div>
                         </div>
@@ -389,6 +392,26 @@ $fullName = trim($firstname . ' ' . ($middlename ? $middlename . ' ' : '') . $la
                         });
                 },
             });
+
+            // Status message handling
+            <?php if (!empty($statusMsg)) { ?>
+                let message = "";
+                switch ("<?php echo $statusMsg; ?>") {
+                    case "added":
+                        message = "Uploaded successfully!";
+                        break;
+                    default:
+                        message = "An error occurred: <?php echo htmlspecialchars($statusMsg); ?>";
+                }
+                swal(message, "", {
+                    icon: message.includes("successfully") ? "success" : "error",
+                    buttons: {
+                        confirm: {
+                            className: "btn btn-success",
+                        },
+                    },
+                });
+            <?php } ?>
         });
     </script>
 </body>

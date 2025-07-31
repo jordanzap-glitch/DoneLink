@@ -112,7 +112,7 @@
                             <div class="collapse" id="approval">
                               <ul class="nav nav-collapse">
                                 <li>
-                                  <a href="add_admin.php">
+                                  <a href="approval.php">
                                     <span class="sub-item">Approval table</span>
                                   </a>
                                 </li>
