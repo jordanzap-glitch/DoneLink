@@ -1,6 +1,9 @@
-<?php // Start the session
-// Assuming the first name is stored in the session
-$fullName = isset($_SESSION['fullname']) ? $_SESSION['fullname'] : 'User '; // Default to 'User ' if not set
+<?php 
+
+// Assuming the first name and last name are stored in the session
+$firstName = isset($_SESSION['firstname']) ? $_SESSION['firstname'] : 'User '; // Default to 'User ' if not set
+$lastName = isset($_SESSION['lastname']) ? $_SESSION['lastname'] : ''; // Default to empty string if not set
+$fullName = trim($firstName); // Combine first name and last name
 ?>
 <nav
             class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"

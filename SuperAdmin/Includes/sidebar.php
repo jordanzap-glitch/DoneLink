@@ -85,7 +85,7 @@
                               <ul class="nav nav-collapse">
                                 <li>
                                   <a href="add_admin.php">
-                                    <span class="sub-item">Add Users</span>
+                                    <span class="sub-item">Add Admin</span>
                                   </a>
                                 </li>
                                 <li>
