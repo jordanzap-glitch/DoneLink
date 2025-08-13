@@ -59,6 +59,22 @@ foreach ($transactions as $transaction) {
     }
 }
 
+// Query to fetch reports with customer full name from tbl_reports and tbl_customer
+$reports = [];
+$result = mysqli_query($conn, "
+    SELECT r.customer_id, r.to_admin, r.status, r.date_created, c.firstname, c.lastname 
+    FROM tbl_reports r 
+    JOIN tbl_customer c ON r.customer_id = c.id 
+    WHERE r.status = 'sent'
+");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $reports[] = $row;
+    }
+} else {
+    echo "Error fetching reports: " . mysqli_error($conn);
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,7 +82,7 @@ foreach ($transactions as $transaction) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Done link</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-    <link rel="icon" href="assets/img/kaiadmin/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="" type="image/x-icon" />
 
     <!-- Fonts and icons -->
     <script src="assets/js/plugin/webfont/webfont.min.js"></script>
@@ -93,6 +109,12 @@ foreach ($transactions as $transaction) {
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link rel="stylesheet" href="assets/css/demo.css" />
+    <style>
+      .report-list {
+        max-height: 300px; /* Set a maximum height for the report list */
+        overflow-y: auto; /* Enable vertical scrolling */
+      }
+    </style>
   </head>
   <body>
     <div class="wrapper">
@@ -281,11 +303,11 @@ foreach ($transactions as $transaction) {
           </div>
            
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-4"> <!-- Changed to col-md-12 for a larger card -->
               <div class="card card-round">
                 <div class="card-body">
                   <div class="card-head-row card-tools-still-right">
-                    <div class="card-title">New Customers</div>
+                    <div class="card-title">Reports</div>
                     <div class="card-tools">
                       <div class="dropdown">
                         <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -299,97 +321,19 @@ foreach ($transactions as $transaction) {
                       </div>
                     </div>
                   </div>
-                  <div class="card-list py-4">
-                    <div class="item-list">
-                      <div class="avatar">
-                        <img src="assets/img/jm_denis.jpg" alt="..." class="avatar-img rounded-circle" />
-                      </div>
-                      <div class="info-user ms-3">
-                        <div class="username">Jimmy Denis</div>
-                        <div class="status">Graphic Designer</div>
-                      </div>
-                      <button class="btn btn-icon btn-link op-8 me-1">
-                        <i class="far fa-envelope"></i>
-                      </button>
-                      <button class="btn btn-icon btn-link btn-danger op-8">
-                        <i class="fas fa-ban"></i>
-                      </button>
-                    </div>
-                    <div class="item-list">
-                      <div class="avatar">
-                        <span class="avatar-title rounded-circle border border-white">CF</span>
-                      </div>
-                      <div class="info-user ms-3">
-                        <div class="username">Chandra Felix</div>
-                        <div class="status">Sales Promotion</div>
-                      </div>
-                      <button class="btn btn-icon btn-link op-8 me-1">
-                        <i class="far fa-envelope"></i>
-                      </button>
-                      <button class="btn btn-icon btn-link btn-danger op-8">
-                        <i class="fas fa-ban"></i>
-                      </button>
-                    </div>
-                    <div class="item-list">
-                      <div class="avatar">
-                        <img src="assets/img/talha.jpg" alt="..." class="avatar-img rounded-circle" />
-                      </div>
-                      <div class="info-user ms-3">
-                        <div class="username">Talha</div>
-                        <div class="status">Front End Designer</div>
-                      </div>
-                      <button class="btn btn-icon btn-link op-8 me-1">
-                        <i class="far fa-envelope"></i>
-                      </button>
-                      <button class="btn btn-icon btn-link btn-danger op-8">
-                        <i class="fas fa-ban"></i>
-                      </button>
-                    </div>
-                    <div class="item-list">
-                      <div class="avatar">
-                        <img src="assets/img/chadengle.jpg" alt="..." class="avatar-img rounded-circle" />
-                      </div>
-                      <div class="info-user ms-3">
-                        <div class="username">Chad</div>
-                        <div class="status">CEO Zeleaf</div>
-                      </div>
-                      <button class="btn btn-icon btn-link op-8 me-1">
-                        <i class="far fa-envelope"></i>
-                      </button>
-                      <button class="btn btn-icon btn-link btn-danger op-8">
-                        <i class="fas fa-ban"></i>
-                      </button>
-                    </div>
-                    <div class="item-list">
-                      <div class="avatar">
-                        <span class="avatar-title rounded-circle border border-white bg-primary">H</span>
-                      </div>
-                      <div class="info-user ms-3">
-                        <div class="username">Hizrian</div>
-                        <div class="status">Web Designer</div>
-                      </div>
-                      <button class="btn btn-icon btn-link op-8 me-1">
-                        <i class="far fa-envelope"></i>
-                      </button>
-                      <button class="btn btn-icon btn-link btn-danger op-8">
-                        <i class="fas fa-ban"></i>
-                      </button>
-                    </div>
-                    <div class="item-list">
-                      <div class="avatar">
-                        <span class="avatar-title rounded-circle border border-white bg-secondary">F</span>
-                      </div>
-                      <div class="info-user ms-3">
-                        <div class="username">Farrah</div>
-                        <div class="status">Marketing</div>
-                      </div>
-                      <button class="btn btn-icon btn-link op-8 me-1">
-                        <i class="far fa-envelope"></i>
-                      </button>
-                      <button class="btn btn-icon btn-link btn-danger op-8">
-                        <i class="fas fa-ban"></i>
-                      </button>
-                    </div>
+                  <div class="report-list py-4">
+                    <ul class="list-group">
+                      <?php foreach ($reports as $report): ?>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <div>
+                            <strong>Customer Name:</strong> <?php echo $report['firstname'] . ' ' . $report['lastname']; ?><br><br>
+                            <strong>To Admin:</strong> <br><?php echo $report['to_admin']; ?><br><br>
+                            <strong>Date:</strong> <?php echo date('M d, Y', strtotime($report['date_created'])); ?>
+                          </div>
+                          <span class="badge badge-danger"><?php echo $report['status']; ?></span> <!-- Changed to badge-danger -->
+                        </li>
+                      <?php endforeach; ?>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -461,7 +405,7 @@ foreach ($transactions as $transaction) {
         });
 
         const labels = Object.keys(salesData);
-       const data = Object.values(salesData);
+        const data = Object.values(salesData);
 
         const ctx = document.getElementById('lineChart').getContext('2d');
         const lineChart = new Chart(ctx, {

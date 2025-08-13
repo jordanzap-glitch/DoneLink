@@ -70,6 +70,29 @@
                 </div>
               </li>
 
+              <li class="nav-section">
+                            <span class="sidebar-mini-icon">
+                              <i class="fa fa-ellipsis-h"></i>
+                            </span>
+                            <h4 class="text-section">Reports</h4>
+                          </li>
+                          <li class="nav-item">
+                            <a data-bs-toggle="collapse" href="#reports">
+                              <i class="fas fa-headset"></i>
+                              <p>Manage Reports</p>
+                              <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="reports">
+                              <ul class="nav nav-collapse">
+                                <li>
+                                  <a href="report.php">
+                                    <span class="sub-item">Send Report</span>
+                                  </a>
+                                </li>
+                                
+                              </ul>
+                            </div>
+                          </li>
 
               <li class="nav-section">
                 <span class="sidebar-mini-icon">

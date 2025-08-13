@@ -306,7 +306,7 @@ $fullName = isset($_SESSION['fullname']) ? $_SESSION['fullname'] : 'User '; // D
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/profile.jpg"
+                        src="assets/img/admin.png"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
@@ -322,7 +322,7 @@ $fullName = isset($_SESSION['fullname']) ? $_SESSION['fullname'] : 'User '; // D
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/profile.jpg"
+                              src="assets/img/admin.png"
                               alt="image profile"
                               class="avatar-img rounded"
                             />

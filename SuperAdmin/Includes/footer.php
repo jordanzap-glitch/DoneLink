@@ -15,7 +15,7 @@
               </ul>
             </nav>
             <div class="copyright">
-              2024
+              2025
             </div>
             <div>
           

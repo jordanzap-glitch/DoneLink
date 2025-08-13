@@ -140,15 +140,11 @@
                             <div class="collapse" id="reports">
                               <ul class="nav nav-collapse">
                                 <li>
-                                  <a href="add_admin.php">
-                                    <span class="sub-item">Change</span>
+                                  <a href="report.php">
+                                    <span class="sub-item">Report</span>
                                   </a>
                                 </li>
-                                <li>
-                                  <a href="add_customer.php">
-                                    <span class="sub-item">Change</span>
-                                  </a>
-                                </li>
+                                
                               </ul>
                             </div>
                           </li>

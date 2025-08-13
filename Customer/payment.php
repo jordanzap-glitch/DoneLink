@@ -112,7 +112,7 @@ $fullName = trim($firstname . ' ' . ($middlename ? $middlename . ' ' : '') . $la
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Payment</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-    <link rel="icon" href="assets/img/kaiadmin/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="" type="image/x-icon" />
 
     <!-- Fonts and icons -->
     <script src="assets/js/plugin/webfont/webfont.min.js"></script>
@@ -263,7 +263,7 @@ $fullName = trim($firstname . ' ' . ($middlename ? $middlename . ' ' : '') . $la
                         <p><strong>Subscription Type:</strong> <span id="viewSubscriptionType"></span></p>
                         <p><strong>Price:</strong> <span id="viewPrice"></span></p>
                         <p><strong>Status:</strong> <span id="viewStatus"></span></p>
-                        <p><strong>Date Created:</strong> <span id="viewDateCreated"></span></p>
+                        <p><strong>Date:</strong> <span id="viewDateCreated"></span></p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" onclick="window.location.href='payment.php';">OK</button>

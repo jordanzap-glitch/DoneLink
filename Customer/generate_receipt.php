@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $pdf->SetFont('Arial', 'B', 16);
 
     // Add content to the PDF
-    $pdf->Cell(0, 10, 'Receipt', 0, 1, 'C');
+    $pdf->Cell(0, 10, 'DoneLink (Receipt)', 0, 1, 'C');
     $pdf->Ln(10);
     $pdf->SetFont('Arial', '', 12);
     $pdf->Cell(0, 10, 'Transaction ID: ' . $transactionId, 0, 1);
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $pdf->Cell(0, 10, 'Subscription Type: ' . $subscriptionType, 0, 1);
     $pdf->Cell(0, 10, 'Price: ' . $price, 0, 1);
     $pdf->Cell(0, 10, 'Status: ' . $status, 0, 1);
-    $pdf->Cell(0, 10, 'Date Created: ' . $dateCreated, 0, 1);
+    $pdf->Cell(0, 10, 'Date: ' . $dateCreated, 0, 1);
 
     // Output the PDF
     $pdf->Output('D', 'receipt_' . $transactionId . '.pdf'); // Download the PDF
