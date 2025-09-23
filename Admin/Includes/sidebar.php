@@ -47,6 +47,32 @@
                 </div>
               </li>
 
+
+
+
+              <li class="nav-section">
+                            <span class="sidebar-mini-icon">
+                              <i class="fa fa-ellipsis-h"></i>
+                            </span>
+                            <h4 class="text-section">Subscriptions</h4>
+                          </li>
+                          <li class="nav-item">
+                            <a data-bs-toggle="collapse" href="#subs">
+                              <i class="fa-regular fa-id-card"></i>
+                              <p>Manage Subscriptions</p>
+                              <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="subs">
+                              <ul class="nav nav-collapse">
+                                <li>
+                                  <a href="substable.php">
+                                    <span class="sub-item">Subscribers Table</span>
+                                  </a>
+                                </li>
+                              </ul>
+                            </div>
+                          </li>
+
               <li class="nav-section">
                 <span class="sidebar-mini-icon">
                   <i class="fa fa-ellipsis-h"></i>
@@ -88,6 +114,12 @@
                                   <a href="approval.php">
                                     <span class="sub-item">Approval table</span>
                                   </a>
+                                  
+                                </li>
+                                <li>
+                                  <a href="deadline.php">
+                                    <span class="sub-item">Deadline table</span>
+                                  </a>
                                 </li>
                               </ul>
                             </div>
@@ -108,8 +140,8 @@
                 <div class="collapse" id="reports">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="add_admin.php">
-                        <span class="sub-item">Change</span>
+                      <a href="report.php">
+                        <span class="sub-item">Report</span>
                       </a>
                     </li>
                     <li>
