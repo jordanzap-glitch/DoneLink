@@ -5,82 +5,53 @@ include '../Includes/dbcon.php';
 // Fetch messages from the database with user details
 $messages = [];
 $query = "
-    SELECT r.id, r.customer_id, r.to_admin, r.to_user, r.status, r.date_created, 
-           c.firstname, c.lastname 
+    SELECT r.id, r.customer_id, r.to_admin, r.to_user, r.status, r.date_created, c.firstname, c.lastname
     FROM tbl_reports r
     LEFT JOIN tbl_customer c ON r.customer_id = c.id
 ";
 $stmt = $conn->prepare($query);
 $stmt->execute();
 $result = $stmt->get_result();
-
 while ($row = $result->fetch_assoc()) {
     $messages[] = $row;
 }
 $stmt->close();
 
-// Initialize status message variable
-$status_message = "";
-
-// Handle form submission for reply
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['delete_message_id'])) {
-        // Handle delete request
-        $delete_id = $_POST['delete_message_id'];
-        $delete_query = "DELETE FROM tbl_reports WHERE id = ?";
-        $delete_stmt = $conn->prepare($delete_query);
-        $delete_stmt->bind_param("i", $delete_id);
+    $to_user = $_POST['to_user'];
+    $message_id = $_POST['message_id'];
 
-        if ($delete_stmt->execute()) {
-            $status_message = "Message deleted!";
+    // Get the customer_id from message_id
+    $stmt = $conn->prepare("SELECT customer_id FROM tbl_reports WHERE id = ?");
+    $stmt->bind_param("i", $message_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $customer_id = $row['customer_id'];
+
+        // Update the message in tbl_reports
+        $update_stmt = $conn->prepare("UPDATE tbl_reports SET to_user = ?, status = 'replied', date_created = NOW() WHERE id = ? AND customer_id = ?");
+        $update_stmt->bind_param("sii", $to_user, $message_id, $customer_id);
+
+        if ($update_stmt->execute()) {
+            $_SESSION['status_message'] = "Reply sent!";
         } else {
-            $status_message = "Error deleting message.";
+            $_SESSION['status_message'] = "Error updating message.";
         }
-        $delete_stmt->close();
-
+        $update_stmt->close();
     } else {
-        // Handle reply request
-        $to_user = $_POST['to_user'];
-        $recipient_name = $_POST['to'];
-        $message_id = $_POST['message_id']; // Get the message ID from the form
-
-        $customer_id_query = "SELECT id FROM tbl_customer WHERE CONCAT(firstname, ' ', lastname) = ?";
-        $stmt = $conn->prepare($customer_id_query);
-        $stmt->bind_param("s", $recipient_name);
-        $stmt->execute();
-        $customer_result = $stmt->get_result();
-
-        if ($customer_result->num_rows > 0) {
-            $customer_row = $customer_result->fetch_assoc();
-            $customer_id = $customer_row['id'];
-
-            $update_query = "UPDATE tbl_reports SET to_user = ?, status = 'replied', date_created = NOW() WHERE id = ? AND customer_id = ?";
-            $update_stmt = $conn->prepare($update_query);
-            $update_stmt->bind_param("sii", $to_user, $message_id, $customer_id);
-
-            if ($update_stmt->execute()) {
-                $status_message = "Reply sent!";
-            } else {
-                $status_message = "Error updating message.";
-            }
-
-            $update_stmt->close();
-        } else {
-            $status_message = "Recipient not found.";
-        }
-        $stmt->close();
+        $_SESSION['status_message'] = "Message not found.";
     }
 
-    // Redirect to avoid form resubmission
-    header("Location: " . $_SERVER['PHP_SELF'] . "?status_message=" . urlencode($status_message));
+    $stmt->close();
+    header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
-
-// Check for status message in the URL
-if (isset($_GET['status_message'])) {
-    $status_message = $_GET['status_message'];
-}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,50 +63,19 @@ if (isset($_GET['status_message'])) {
     <!-- Fonts and icons -->
     <script src="assets/js/plugin/webfont/webfont.min.js"></script>
     <script>
-        WebFont.load({
-            google: { families: ["Public Sans:300,400,500,600,700"] },
-            custom: {
-                families: [
-                    "Font Awesome 5 Solid",
-                    "Font Awesome 5 Regular",
-                    "Font Awesome 5 Brands",
-                    "simple-line-icons",
-                ],
-                urls: ["assets/css/fonts.min.css"],
-            },
-            active: function () {
-                sessionStorage.fonts = true;
-            },
-        });
+    WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+            families: ["Font Awesome 5 Solid","Font Awesome 5 Regular","Font Awesome 5 Brands","simple-line-icons"],
+            urls: ["assets/css/fonts.min.css"]
+        },
+        active: function(){ sessionStorage.fonts = true; }
+    });
 
-        function populateRecipientName(firstname, lastname, messageId) {
-            document.getElementById('to').value = firstname + ' ' + lastname;
-            document.getElementById('message_id').value = messageId;
-        }
-
-        function confirmDelete(messageId) {
-            swal({
-                title: "Are you sure?",
-                text: "Once deleted, you will not be able to recover this message!",
-                icon: "warning",
-                buttons: true,
-                dangerMode: true,
-            }).then((willDelete) => {
-                if (willDelete) {
-                    // Create a form to submit the deletion
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '';
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'delete_message_id';
-                    input.value = messageId;
-                    form.appendChild(input);
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
+    function populateRecipientName(firstname, lastname, messageId) {
+        document.getElementById('to').value = firstname + ' ' + lastname;
+        document.getElementById('message_id').value = messageId;
+    }
     </script>
 
     <!-- CSS Files -->
@@ -143,31 +83,18 @@ if (isset($_GET['status_message'])) {
     <link rel="stylesheet" href="assets/css/plugins.min.css" />
     <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
     <link rel="stylesheet" href="assets/css/demo.css" />
+
     <style>
-        .message-highlight {
-            background-color: #f0f8ff;
-            border-left: 5px solid #007bff;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .reply-highlight {
-            background-color: #fff3cd;
-            border-left: 5px solid #ffc107;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .inbox-scroll {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .action-buttons {
-            margin-top: 10px;
-        }
+    .message-highlight { background-color: #f0f8ff; border-left: 5px solid #007bff; padding: 10px; margin-bottom: 10px; }
+    .reply-highlight { background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 10px; margin-bottom: 10px; }
+    .inbox-scroll { max-height: 400px; overflow-y: auto; }
     </style>
 </head>
 <body>
 <div class="wrapper">
+    <!-- Sidebar -->
     <?php include 'Includes/sidebar.php';?>
+    <!-- Navbar Header -->
     <?php include 'Includes/header.php';?>
 
     <div class="container">
@@ -182,12 +109,12 @@ if (isset($_GET['status_message'])) {
                     <li class="nav-item"><a href="#">Reply to Users</a></li>
                 </ul>
             </div>
+
             <div class="row">
+                <!-- Reply Form -->
                 <div class="col-md-6">
                     <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Send Reply to Users</div>
-                        </div>
+                        <div class="card-header"><div class="card-title">Send Reply to the Users</div></div>
                         <div class="card-body">
                             <form method="POST" action="">
                                 <input type="hidden" name="message_id" id="message_id" value="" />
@@ -211,43 +138,43 @@ if (isset($_GET['status_message'])) {
                         </div>
                     </div>
                 </div>
+
+                <!-- Inbox -->
                 <div class="col-md-6">
                     <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Inbox</div>
-                        </div>
+                        <div class="card-header"><div class="card-title">Inbox</div></div>
                         <div class="card-body inbox-scroll">
                             <ul class="list-group">
-                                <?php if (empty($messages)): ?>
-                                    <li class="list-group-item">No messages found.</li>
-                                <?php else: ?>
-                                    <?php foreach ($messages as $message): ?>
-                                        <li class="list-group-item">
-                                            <div class="media">
-                                                <div class="media-body">
-                                                    <div class="message-highlight">
-                                                        <strong>To Admin</strong> <br><br>
-                                                        <strong>From:</strong> <?php echo htmlspecialchars($message['firstname'] . ' ' . $message['lastname']); ?><br><br>
-                                                        <strong>Message:</strong> <br><?php echo nl2br(htmlspecialchars($message['to_admin'])); ?><br><br>
-                                                    </div>
-                                                    <div class="reply-highlight">
-                                                        <strong>Admin Reply:</strong> <br><?php echo nl2br(htmlspecialchars($message['to_user'])); ?><br><br>
-                                                    </div>
-                                                    <strong>Status:</strong> <?php echo htmlspecialchars($message['status']); ?><br>
-                                                    <strong>Date:</strong> <?php echo htmlspecialchars($message['date_created']); ?>
-                                                    <div class="action-buttons float-right">
-                                                        <a href="#" class="btn btn-primary" title="Reply" onclick="populateRecipientName('<?php echo htmlspecialchars($message['firstname']); ?>', '<?php echo htmlspecialchars($message['lastname']); ?>', <?php echo $message['id']; ?>)">
-                                                            <i class="fas fa-reply"></i> Reply
-                                                        </a>
-                                                        <button class="btn btn-danger" onclick="confirmDelete(<?php echo $message['id']; ?>)">
-                                                            <i class="fas fa-trash-alt"></i> Delete
-                                                        </button>
-                                                    </div>
+                            <?php if (empty($messages)): ?>
+                                <li class="list-group-item">No messages found.</li>
+                            <?php else: ?>
+                                <?php foreach ($messages as $message): ?>
+                                    <li class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-body">
+                                                <div class="message-highlight">
+                                                    <strong>To Admin</strong><br><br>
+                                                    <strong>From:</strong> <?php echo htmlspecialchars($message['firstname'] . ' ' . $message['lastname']); ?><br><br>
+                                                    <strong>Message:</strong><br><?php echo nl2br(htmlspecialchars($message['to_admin'])); ?><br><br>
                                                 </div>
+                                                <?php if(!empty($message['to_user'])): ?>
+                                                <div class="reply-highlight">
+                                                    <strong>Admin Reply:</strong><br><?php echo nl2br(htmlspecialchars($message['to_user'])); ?><br><br>
+                                                </div>
+                                                <?php endif; ?>
+                                                <strong>Status:</strong> <?php echo htmlspecialchars($message['status']); ?><br>
+                                                <strong>Date:</strong> <?php echo htmlspecialchars($message['date_created']); ?>
                                             </div>
-                                        </li>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                            <div class="float-right mt-2">
+                                                <a href="#" class="btn btn-primary" title="Reply"
+                                                   onclick="populateRecipientName('<?php echo htmlspecialchars($message['firstname']); ?>', '<?php echo htmlspecialchars($message['lastname']); ?>', <?php echo $message['id']; ?>)">
+                                                    <i class="fas fa-reply"></i> Reply
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                             </ul>
                         </div>
                     </div>
@@ -256,6 +183,7 @@ if (isset($_GET['status_message'])) {
         </div>
     </div>
 
+    <!-- Footer -->
     <?php include 'Includes/footer.php';?>
 </div>
 
@@ -266,4 +194,21 @@ if (isset($_GET['status_message'])) {
 <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
 <script src="assets/js/plugin/chart.js/chart.min.js"></script>
 <script src="assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
-<script src="assets/js/plugin/chart-circle/c
+<script src="assets/js/plugin/chart-circle/circles.min.js"></script>
+<script src="assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+<script src="assets/js/kaiadmin.min.js"></script>
+<script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+<script>
+<?php if(!empty($_SESSION['status_message'])): ?>
+    let message = "<?php echo $_SESSION['status_message']; ?>";
+    swal(message, "", {
+        icon: message.includes("sent") ? "success" : "error",
+        buttons: { confirm: { className: "btn btn-success" } }
+    });
+    <?php unset($_SESSION['status_message']); ?>
+<?php endif; ?>
+</script>
+
+</body>
+</html>
