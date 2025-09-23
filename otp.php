@@ -130,8 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="flex flex-wrap -mx-3 -mt-48 md:-mt-56 lg:-mt-48">
                     <div class="w-full max-w-full px-3 mx-auto mt-0 md:flex-0 shrink-0 md:w-7/12 lg:w-5/12 xl:w-4/12">
                         <div class="relative z-0 flex flex-col min-w-0 break-words bg-white border-0 shadow-soft-xl rounded-2xl bg-clip-border">
-                            <div class="p-6 mb-0 text-center bg-white border-b-0 rounded-t-2xl">
-                                <h5>Enter your OTP</h5>
+                            <div class="p-6 mb-0 flex items-center justify-start bg-white border-b-0 rounded-t-2xl">
+                                <a href="index.php" class="inline-flex items-center text-gray-700 hover:text-gray-900 font-semibold">
+                                    <i class="fas fa-arrow-left mr-2"></i> Back
+                                </a>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<h5 class="ml-4">Enter your OTP</h5>
                             </div>
                             <div class="flex-auto p-6">
                                 <form method="POST" action="">

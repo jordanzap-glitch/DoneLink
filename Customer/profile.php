@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+error_reporting(E_ALL);
 include '../Includes/session.php'; // Include session management 
 include '../Includes/dbcon.php';
 
@@ -110,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['new_password'])) {
     } else {
         $statusMessage = "Current password is incorrect.";
     }
-    $stmt->close();
 }
 
 $stmt->close();

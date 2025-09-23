@@ -55,10 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $transactionId = generateTransactionId();
                 $status = 'Pending';
                 $dateCreated = date('Y-m-d H:i:s'); // Current date and time
-                $dueDate = date('Y-m-d H:i:s', strtotime('+1 month', strtotime($dateCreated))); // Calculate due date
 
-                // Insert the payment record into the database
-                $query = "INSERT INTO tbl_payment (image_path, customer_id, subscription_id, price, transaction_id, status, date_created, due_date, contact_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                // Insert the payment record into the database (without due_date and deadline_status)
+                $query = "INSERT INTO tbl_payment (image_path, customer_id, subscription_id, price, transaction_id, status, date_created, contact_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($query);
 
                 // Check if the statement was prepared successfully
@@ -67,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
 
                 // Bind parameters
-                $stmt->bind_param("siissssss", $dest_path, $customerId, $subscriptionId, $price, $transactionId, $status, $dateCreated, $dueDate, $contactNo);
+                $stmt->bind_param("siisssss", $dest_path, $customerId, $subscriptionId, $price, $transactionId, $status, $dateCreated, $contactNo);
 
                 // Execute the statement
                 if ($stmt->execute()) {

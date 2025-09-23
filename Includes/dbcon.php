@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "donlink_db";
+$database = "donelink";
 $port = 3306;
 // Create connection
 $conn = mysqli_connect($servername, $username, $password, $database, $port);

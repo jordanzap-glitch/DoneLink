@@ -62,7 +62,12 @@
                               <ul class="nav nav-collapse">
                                 <li>
                                   <a href="addsub.php">
-                                    <span class="sub-item">Add Subscription</span>
+                                    <span class="sub-item">Add Subscription Type</span>
+                                  </a>
+                                </li>
+                                <li>
+                                  <a href="substable.php">
+                                    <span class="sub-item">Subscribers Table</span>
                                   </a>
                                 </li>
                               </ul>
