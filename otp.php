@@ -170,10 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <<footer class="py-12">
         <div class="container">
             <div class="flex flex-wrap -mx-3">
-                <div class="flex-shrink-0 w-full max-w-full mx-auto mb-6 text-center lg:flex-0 lg:w-8/12">
-                    <a href="javascript:;" target="_blank" class="mb-2 mr-4 text-slate-400 sm:mb-0 xl:mr-12">About Us</a>
-                    <a href="javascript:;" target="_blank" class="mb-2 mr-4 text-slate-400 sm:mb-0 xl:mr-12">Pricing</a>
-                </div>
+               
                 <div class="flex-shrink-0 w-full max-w-full mx-auto mt-2 mb-6 text-center lg:flex-0 lg:w-8/12">
                     <a href="javascript:;" target="_blank" class="mr-6 text-slate-400">
                         <span class="text-lg fab fa-dribbble"></span>

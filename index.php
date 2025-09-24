@@ -216,12 +216,7 @@ ob_end_flush();
                                         </div>
                                     </form>
                                 </div>
-                                <div class="p-6 px-1 pt-0 text-center bg-transparent border-t-0 border-t-solid rounded-b-2xl lg:px-2">
-                                    <p class="mx-auto mb-6 leading-normal text-sm">
-                                        Don't have an account?
-                                        <a href="pages/sign-up.html" class="relative z-10 font-semibold text-transparent bg-gradient-to-tl from-blue-600 to-cyan-400 bg-clip-text">Sign up</a>
-                                    </p>
-                                </div>
+                                
                             </div>
                         </div>
                         <div class="w-full max-w-full px-3 lg:flex-0 shrink-0 md:w-6/12">
@@ -237,10 +232,7 @@ ob_end_flush();
     <footer class="py-12">
         <div class="container">
             <div class="flex flex-wrap -mx-3">
-                <div class="flex-shrink-0 w-full max-w-full mx-auto mb-6 text-center lg:flex-0 lg:w-8/12">
-                    <a href="javascript:;" target="_blank" class="mb-2 mr-4 text-slate-400 sm:mb-0 xl:mr-12">About Us</a>
-                    <a href="javascript:;" target="_blank" class="mb-2 mr-4 text-slate-400 sm:mb-0 xl:mr-12">Pricing</a>
-                </div>
+                
                 <div class="flex-shrink-0 w-full max-w-full mx-auto mt-2 mb-6 text-center lg:flex-0 lg:w-8/12">
                     <a href="javascript:;" target="_blank" class="mr-6 text-slate-400">
                         <span class="text-lg fab fa-dribbble"></span>
